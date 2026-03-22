@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI MODEL GALLERY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+JP:wght@300;400&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f4f2ee;
+    --accent: #c8a96e;
+    --mid: #1e1e1e;
+    --muted: #5a5a5a;
+    --border: #2a2a2a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 48px 60px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--black);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 0.25em;
+    color: var(--white);
+  }
+
+  .logo span { color: var(--accent); }
+
+  .logo-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    padding: 24px 60px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-right: 12px;
+  }
+
+  .filter-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px 18px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: var(--black); }
+
+  .count {
+    margin-left: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── GRID ── */
+  main { padding: 40px 60px 80px; }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2px;
+  }
+
+  /* ── CARD ── */
+  .model-card {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--mid);
+    opacity: 0;
+    animation: fadeUp 0.5s forwards;
+  }
+
+  .model-card:hover .card-overlay { opacity: 1; }
+  .model-card:hover .card-img { transform: scale(1.04); }
+
+  .card-img-wrap {
+    overflow: hidden;
+    aspect-ratio: 3/4;
+    background: var(--mid);
+  }
+
+  .card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .card-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .placeholder-icon {
+    width: 64px; height: 64px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .placeholder-icon svg { opacity: 0.25; }
+
+  .placeholder-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.2em;
+    color: var(--muted); text-transform: uppercase;
+  }
+
+  .card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 24px;
+  }
+
+  .card-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.25em;
+    color: var(--accent); text-transform: uppercase; margin-bottom: 8px;
+  }
+
+  .card-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 400; letter-spacing: 0.05em;
+    color: var(--white); margin-bottom: 4px;
+  }
+
+  .card-meta { font-size: 11px; color: rgba(244,242,238,0.6); letter-spacing: 0.05em; }
+
+  .card-info {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-info-row { display: flex; justify-content: space-between; align-items: center; }
+
+  .card-gender-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.2em;
+    color: var(--muted); text-transform: uppercase;
+  }
+
+  .card-gender-badge.female { color: #d4a0a0; }
+  .card-gender-badge.male   { color: #7ab0c8; }
+  .card-style { font-size: 11px; color: var(--muted); }
+
+  /* pose count badge */
+  .pose-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.15em;
+    color: var(--accent);
+    border: 1px solid rgba(200,169,110,0.3);
+    padding: 3px 8px;
+  }
+
+  /* ── MODAL ── */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 1000;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 40px;
+    transition: opacity 0.3s;
+  }
+
+  .modal-bg.open { display: flex; }
+
+  .modal {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    max-width: 960px; width: 100%;
+    max-height: 92vh;
+    background: var(--mid);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  /* Left: image + thumbnails */
+  .modal-img-col {
+    display: flex;
+    flex-direction: column;
+    background: #111;
+    overflow: hidden;
+  }
+
+  .modal-img-main {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .modal-img-main img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top;
+    display: block;
+    transition: opacity 0.25s;
+  }
+
+  .modal-img-main .modal-img-placeholder {
+    width: 100%; height: 100%; min-height: 400px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em;
+  }
+
+  /* Thumbnail strip */
+  .modal-thumbs {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    background: #0a0a0a;
+    flex-shrink: 0;
+  }
+
+  .modal-thumb {
+    flex: 1;
+    aspect-ratio: 1;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .modal-thumb:hover { opacity: 0.75; }
+  .modal-thumb.active { opacity: 1; border-color: var(--accent); }
+
+  .modal-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top;
+    display: block;
+  }
+
+  /* Right: info */
+  .modal-body {
+    padding: 44px 36px;
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .modal-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.3em;
+    color: var(--accent); text-transform: uppercase; margin-bottom: 16px;
+  }
+
+  .modal-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px; font-weight: 300; line-height: 1.0;
+    margin-bottom: 20px;
+  }
+
+  .modal-divider { width: 40px; height: 1px; background: var(--accent); margin-bottom: 24px; }
+
+  .modal-specs { display: grid; gap: 14px; margin-bottom: 28px; }
+
+  .spec-row { display: flex; gap: 16px; }
+
+  .spec-key {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.2em;
+    color: var(--muted); text-transform: uppercase;
+    width: 80px; flex-shrink: 0; padding-top: 2px;
+  }
+
+  .spec-val { font-size: 13px; color: var(--white); line-height: 1.5; }
+
+  .modal-desc {
+    font-size: 12px; color: rgba(244,242,238,0.6);
+    line-height: 1.8; margin-bottom: 28px;
+  }
+
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: auto; }
+
+  .tag-pill {
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    font-size: 11px; color: var(--muted); letter-spacing: 0.05em;
+  }
+
+  .modal-close {
+    margin-top: 28px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 10px 24px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em;
+    cursor: pointer; text-transform: uppercase;
+    transition: all 0.2s; align-self: flex-start;
+  }
+
+  .modal-close:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    display: none; padding: 80px 0; text-align: center;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 32px 60px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .footer-note {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.2em;
+    color: var(--muted); text-transform: uppercase;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .model-card:nth-child(1)  { animation-delay: 0.05s; }
+  .model-card:nth-child(2)  { animation-delay: 0.10s; }
+  .model-card:nth-child(3)  { animation-delay: 0.15s; }
+  .model-card:nth-child(4)  { animation-delay: 0.20s; }
+  .model-card:nth-child(5)  { animation-delay: 0.25s; }
+  .model-card:nth-child(6)  { animation-delay: 0.30s; }
+
+  
+
+  /* ── TABLET ── */
+  @media (max-width: 900px) {
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .modal { grid-template-columns: 1fr 1fr; }
+    .modal-name { font-size: 36px; }
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 640px) {
+    /* layout */
+    header { padding: 24px 20px 20px; flex-direction: column; align-items: flex-start; gap: 8px; }
+    .logo { font-size: 20px; letter-spacing: 0.2em; }
+    .logo-sub { font-size: 8px; }
+
+    /* filter bar */
+    .filter-bar { padding: 14px 20px; gap: 6px; }
+    .filter-label { display: none; }
+    .filter-btn { padding: 6px 12px; font-size: 11px; }
+    .count { font-size: 10px; }
+
+    /* gallery grid — 2 columns on mobile */
+    main { padding: 16px 8px 60px; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 2px; }
+
+    /* cards */
+    .card-name { font-size: 16px; }
+    .card-tag { font-size: 8px; }
+    .card-meta { display: none; }
+    .card-info { padding: 10px 12px; }
+    .card-gender-badge { font-size: 8px; }
+    .card-style { font-size: 10px; }
+    .pose-badge { font-size: 8px; padding: 2px 6px; }
+
+    /* modal — full screen sheet from bottom */
+    .modal-bg { padding: 0; align-items: flex-end; }
+
+    .modal {
+      grid-template-columns: 1fr;
+      width: 100%;
+      max-width: 100%;
+      max-height: 92vh;
+      border-left: none;
+      border-right: none;
+      border-bottom: none;
+      border-top: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      overflow-y: auto;
+    }
+
+    .modal-img-col {
+      height: 55vw;
+      max-height: 300px;
+      flex-direction: row;
+    }
+
+    .modal-img-main { flex: 1; }
+
+    .modal-thumbs {
+      flex-direction: column;
+      width: 56px;
+      gap: 2px;
+    }
+
+    .modal-body {
+      padding: 24px 20px 32px;
+    }
+
+    .modal-name { font-size: 32px; margin-bottom: 14px; }
+    .modal-eyebrow { font-size: 8px; margin-bottom: 10px; }
+    .modal-divider { margin-bottom: 16px; }
+    .modal-specs { gap: 10px; margin-bottom: 18px; }
+    .spec-key { font-size: 8px; width: 68px; }
+    .spec-val { font-size: 12px; }
+    .modal-desc { font-size: 11px; margin-bottom: 18px; }
+    .tag-pill { font-size: 10px; padding: 3px 10px; }
+    .modal-close { padding: 9px 20px; font-size: 9px; margin-top: 20px; }
+
+    /* lock screen */
+    .lock-inner { padding: 0 24px; }
+    .lock-logo { font-size: 24px; margin-bottom: 4px; }
+    .lock-sub { font-size: 8px; margin-bottom: 40px; }
+    .lock-label { font-size: 8px; }
+    #pwInput { font-size: 13px; padding: 12px 16px; }
+    #lockBtn { font-size: 9px; padding: 0 14px; }
+    .lock-divider { margin: 36px 0 24px; }
+    .lock-note { font-size: 10px; }
+
+    /* footer */
+    footer {
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+      padding: 20px;
+    }
+    .footer-note { font-size: 8px; }
+  }
+
+  /* ── VERY SMALL (375px and below) ── */
+  @media (max-width: 375px) {
+    .gallery-grid { grid-template-columns: 1fr 1fr; gap: 1px; }
+    .filter-bar { gap: 4px; }
+    .filter-btn { padding: 5px 9px; font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">AI <span>MODEL</span> GALLERY</div>
+    <div class="logo-sub">Powered by GRIDMAN — For Corporate Use</div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <span class="filter-label">Filter</span>
+  <button class="filter-btn active" data-filter="all">すべて</button>
+  <button class="filter-btn" data-filter="female">女性</button>
+  <button class="filter-btn" data-filter="male">男性</button>
+  <button class="filter-btn" data-filter="business">ビジネス</button>
+  <button class="filter-btn" data-filter="casual">カジュアル</button>
+  <button class="filter-btn" data-filter="formal">フォーマル</button>
+  <span class="count" id="count"></span>
+</div>
+
+<main>
+  <div class="gallery-grid" id="gallery"></div>
+  <div class="empty-state" id="empty">該当するモデルがありません</div>
+</main>
+
+<!-- ── MODAL ── -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modal">
+    <div class="modal-img-col">
+      <div class="modal-img-main" id="modalImgMain"></div>
+      <div class="modal-thumbs" id="modalThumbs"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-eyebrow" id="modalEyebrow"></div>
+      <div class="modal-name" id="modalName"></div>
+      <div class="modal-divider"></div>
+      <div class="modal-specs" id="modalSpecs"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-tags" id="modalTags"></div>
+      <button class="modal-close" onclick="closeModal()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-note">© GRIDMAN 株式会社 — 法人専用 AI モデル素材</span>
+  <span class="footer-note">本素材の無断転載・二次使用を禁じます</span>
+</footer>
+
+<script>
+// ─── MODEL DATA ───────────────────────────────────────────
+// image  : カードのメイン表示画像
+// images : モーダル内で切り替え可能な全ポーズ
+const models = [
+  {
+    id: 1,
+    name: "Emi",
+    gender: "female",
+    style: "business",
+    image: "images/emi_01.png",
+    images: [
+      { src: "images/emi_01.png", label: "Pose A" },
+      { src: "images/emi_02.png", label: "Pose B" },
+      { src: "images/emi_03.png", label: "Pose C" },
+      { src: "images/emi_04.png", label: "Pose D" }
+    ],
+    description: "清潔感と知性を兼ね備えたビジネスポートレート。白シャツ×黒パンツのシンプルなスタイリングで幅広い用途に対応。4ポーズから選択可能。",
+    specs: { 使用用途: "EC・広告・採用・法人サイト", スタイル: "ビジネス", ポーズ数: "4カット", 言語対応: "日本語・英語・多言語" },
+    tags: ["ビジネス", "EC", "広告", "採用", "法人", "清潔感"]
+  }
+  // ─── 追加モデルはここから ───────────────────────────────
+  // {
+  //   id: 2, name: "Hana", gender: "female", style: "casual",
+  //   image: "images/hana_01.jpg",
+  //   images: [{ src: "images/hana_01.jpg", label: "Pose A" }],
+  //   description: "...",
+  //   specs: { 使用用途: "...", スタイル: "カジュアル", ポーズ数: "1カット", 言語対応: "日本語" },
+  //   tags: ["カジュアル"]
+  // },
+];
+
+// ─── RENDER ──────────────────────────────────────────────
+const gallery = document.getElementById('gallery');
+const countEl  = document.getElementById('count');
+const emptyEl  = document.getElementById('empty');
+
+function renderCards(data) {
+  gallery.innerHTML = '';
+  if (data.length === 0) {
+    emptyEl.style.display = 'block';
+    countEl.textContent = '0 models';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  countEl.textContent = `${data.length} model${data.length !== 1 ? 's' : ''}`;
+
+  data.forEach((m, i) => {
+    const card = document.createElement('div');
+    card.className = 'model-card';
+    card.style.animationDelay = `${i * 0.06}s`;
+
+    const genderLabel = m.gender === 'female' ? '女性' : '男性';
+    const styleLabel  = { business: 'ビジネス', casual: 'カジュアル', formal: 'フォーマル' }[m.style];
+    const poseCount   = m.images ? m.images.length : 1;
+
+    const imgContent = m.image
+      ? `<img class="card-img" src="${m.image}" alt="${m.name}" loading="lazy">`
+      : `<div class="card-img-placeholder">
+          <div class="placeholder-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </div>
+          <span class="placeholder-text">IMAGE HERE</span>
+        </div>`;
+
+    card.innerHTML = `
+      <div class="card-img-wrap">
+        ${imgContent}
+        <div class="card-overlay">
+          <div class="card-tag">${genderLabel} · ${styleLabel}</div>
+          <div class="card-name">${m.name}</div>
+          <div class="card-meta">${m.description.slice(0, 28)}…</div>
+        </div>
+      </div>
+      <div class="card-info">
+        <div class="card-info-row">
+          <span class="card-gender-badge ${m.gender}">${genderLabel} MODEL</span>
+          ${poseCount > 1 ? `<span class="pose-badge">${poseCount} POSES</span>` : ''}
+          <span class="card-style">${styleLabel}</span>
+        </div>
+      </div>`;
+
+    card.addEventListener('click', () => openModal(m));
+    gallery.appendChild(card);
+  });
+}
+
+// ─── FILTER ──────────────────────────────────────────────
+let activeFilter = 'all';
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    const filtered = activeFilter === 'all'
+      ? models
+      : models.filter(m => m.gender === activeFilter || m.style === activeFilter);
+    renderCards(filtered);
+  });
+});
+
+// ─── MODAL ──────────────────────────────────────────────
+let currentImages = [];
+let currentIdx = 0;
+
+function setModalImage(idx) {
+  currentIdx = idx;
+  const imgMain = document.getElementById('modalImgMain');
+  const img = imgMain.querySelector('img');
+  if (img) {
+    img.style.opacity = '0';
+    setTimeout(() => { img.src = currentImages[idx].src; img.style.opacity = '1'; }, 150);
+  }
+  document.querySelectorAll('.modal-thumb').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+}
+
+function openModal(m) {
+  const bg = document.getElementById('modalBg');
+  const genderLabel = m.gender === 'female' ? '女性' : '男性';
+  const styleLabel  = { business: 'ビジネス', casual: 'カジュアル', formal: 'フォーマル' }[m.style];
+
+  document.getElementById('modalEyebrow').textContent = `${genderLabel} MODEL — ${styleLabel}`;
+  document.getElementById('modalName').textContent = m.name;
+  document.getElementById('modalDesc').textContent = m.description;
+
+  // main image
+  currentImages = m.images || [{ src: m.image, label: 'Pose A' }];
+  currentIdx = 0;
+  const imgMain = document.getElementById('modalImgMain');
+  imgMain.innerHTML = m.image
+    ? `<img src="${currentImages[0].src}" alt="${m.name}" style="transition:opacity 0.2s;">`
+    : `<div class="modal-img-placeholder">IMAGE HERE</div>`;
+
+  // thumbnails
+  const thumbsEl = document.getElementById('modalThumbs');
+  thumbsEl.innerHTML = '';
+  if (currentImages.length > 1) {
+    currentImages.forEach((img, i) => {
+      const t = document.createElement('div');
+      t.className = `modal-thumb${i === 0 ? ' active' : ''}`;
+      t.innerHTML = `<img src="${img.src}" alt="${img.label}" loading="lazy">`;
+      t.addEventListener('click', () => setModalImage(i));
+      thumbsEl.appendChild(t);
+    });
+  }
+
+  // specs
+  const specsEl = document.getElementById('modalSpecs');
+  specsEl.innerHTML = Object.entries(m.specs).map(([k, v]) =>
+    `<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`
+  ).join('');
+
+  // tags
+  document.getElementById('modalTags').innerHTML =
+    m.tags.map(t => `<span class="tag-pill">${t}</span>`).join('');
+
+  bg.style.display = 'flex';
+  requestAnimationFrame(() => bg.style.opacity = '1');
+}
+
+function closeModal() {
+  const bg = document.getElementById('modalBg');
+  bg.style.opacity = '0';
+  setTimeout(() => { bg.style.display = 'none'; }, 300);
+}
+
+document.getElementById('modalBg').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalBg')) closeModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowRight' && document.getElementById('modalBg').style.display === 'flex') {
+    setModalImage((currentIdx + 1) % currentImages.length);
+  }
+  if (e.key === 'ArrowLeft' && document.getElementById('modalBg').style.display === 'flex') {
+    setModalImage((currentIdx - 1 + currentImages.length) % currentImages.length);
+  }
+});
+
+// ─── INIT ────────────────────────────────────────────────
+renderCards(models);
+</script>
+</body>
+</html>
