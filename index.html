@@ -553,15 +553,15 @@ const models = [
     name: "Emi",
     gender: "female",
     style: "business",
-    image: "images/emi_01.png",
+    image: "emi_01.png",
     images: [
-      { src: "images/emi_01.png", label: "Pose A" },
-      { src: "images/emi_02.png", label: "Pose B" },
-      { src: "images/emi_03.png", label: "Pose C" },
-      { src: "images/emi_04.png", label: "Pose D" }
+      { src: "emi_01.png", label: "Pose A" },
+      { src: "emi_02.png", label: "Pose B" },
+      { src: "emi_03.png", label: "Pose C" },
+      { src: "emi_04.png", label: "Pose D" }
     ],
-    description: "清潔感と知性を兼ね備えたビジネスポートレート。白シャツ×黒パンツのシンプルなスタイリングで幅広い用途に対応。4ポーズから選択可能。",
-    specs: { 使用用途: "EC・広告・採用・法人サイト", スタイル: "ビジネス", ポーズ数: "4カット", 言語対応: "日本語・英語・多言語" },
+    description: "清潔感と知性を兼ね備えたビジネスポートレート。白シャツ×黒パンツのシンプルなスタイリングで幅広い用途に対応。",
+    specs: { 使用用途: "EC・広告・採用・法人サイト", スタイル: "ビジネス", 言語対応: "日本語・英語・多言語" },
     tags: ["ビジネス", "EC", "広告", "採用", "法人", "清潔感"]
   }
   // ─── 追加モデルはここから ───────────────────────────────
@@ -570,7 +570,7 @@ const models = [
   //   image: "images/hana_01.jpg",
   //   images: [{ src: "images/hana_01.jpg", label: "Pose A" }],
   //   description: "...",
-  //   specs: { 使用用途: "...", スタイル: "カジュアル", ポーズ数: "1カット", 言語対応: "日本語" },
+  //   specs: { 使用用途: "...", スタイル: "カジュアル", 言語対応: "日本語" },
   //   tags: ["カジュアル"]
   // },
 ];
@@ -597,8 +597,6 @@ function renderCards(data) {
 
     const genderLabel = m.gender === 'female' ? '女性' : '男性';
     const styleLabel  = { business: 'ビジネス', casual: 'カジュアル', formal: 'フォーマル' }[m.style];
-    const poseCount   = m.images ? m.images.length : 1;
-
     const imgContent = m.image
       ? `<img class="card-img" src="${m.image}" alt="${m.name}" loading="lazy">`
       : `<div class="card-img-placeholder">
@@ -622,7 +620,6 @@ function renderCards(data) {
       <div class="card-info">
         <div class="card-info-row">
           <span class="card-gender-badge ${m.gender}">${genderLabel} MODEL</span>
-          ${poseCount > 1 ? `<span class="pose-badge">${poseCount} POSES</span>` : ''}
           <span class="card-style">${styleLabel}</span>
         </div>
       </div>`;
